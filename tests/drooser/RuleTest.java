@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.kie.api.KieServices;
 import org.kie.api.event.rule.AfterMatchFiredEvent;
 import org.kie.api.event.rule.AgendaEventListener;
+import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
+import org.kie.api.event.rule.ObjectInsertedEvent;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.mockito.ArgumentCaptor;
@@ -19,6 +21,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+
+// TODO javadoc komment
+// TODO user generalas kiszervezese
+// TODO beforeEach, BeforeAl
+// TODO this konvencio
 public class RuleTest {
 
     private static KieSession kSession;
@@ -30,7 +37,7 @@ public class RuleTest {
         try {
             KieServices kieServices = KieServices.Factory.get();
             KieContainer kContainer = kieServices.getKieClasspathContainer();
-            kSession = kContainer.newKieSession("ksession-rule");
+            RuleTest.kSession = kContainer.newKieSession("ksession-rule");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,8 +82,8 @@ public class RuleTest {
         List<AfterMatchFiredEvent> events = captor.getAllValues();
 
         List<String> expected = new ArrayList<String>(Arrays.asList("Approve user",
-                                                                    "Set Discount for employees",
-                                                                    "Set test result for rejection"));
+                                                                "Set Discount for employees",
+                                                                "Set test result for rejection"));
         List<String> result = new ArrayList<String>();
 
         for (int i = 0; i < events.size(); i++) {
@@ -84,7 +91,6 @@ public class RuleTest {
         }
 
         assertEquals(expected, result);
-
     }
 
     @Test
@@ -171,6 +177,34 @@ public class RuleTest {
         int rulesFired = kSession.fireAllRules(new RuleNameEqualsAgendaFilter("Decline user"));
 
         assertEquals(false, bob.getApproved());
+    }
+
+    @Test
+    @DisplayName("Test Working Memory Changes")
+    public void testWorkingMemoryChanges() throws Exception {
+        bob.setTestResult(85);
+        bob.setLicenseAge(5);
+        DebugRuleRuntimeEventListener eventListener = mock(DebugRuleRuntimeEventListener.class);
+        kSession.addEventListener(eventListener);
+        kSession.insert(bob);
+
+//        DebugRuleRuntimeEventListener eventListener = new DebugRuleRuntimeEventListener();
+
+        kSession.fireAllRules();
+
+        List<String> expected = new ArrayList<String>(Arrays.asList("Approve user",
+                                                                "Set Discount for employees",
+                                                                "Set test result for rejection"));
+
+        ArgumentCaptor<ObjectInsertedEvent> captor = ArgumentCaptor.forClass(ObjectInsertedEvent.class);
+        verify(eventListener, times(1)).objectInserted(captor.capture());
+        List<ObjectInsertedEvent> events = captor.getAllValues();
+
+        System.out.println(events.size());
+        System.out.println(events.get(0));
+
+//        ObjectInsertedEvent first = events.get(0);
+//        assertEquals(expected.get(0), events.get(0).getRule().getName());
     }
 
 
