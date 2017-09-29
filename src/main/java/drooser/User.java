@@ -3,13 +3,15 @@ package drooser;
 public class User {
 
     private String type;
-    private Integer discount = 0;
-    private Integer testResult;
-    private Boolean approved = false;
-    private Integer licenseAge;
+    private int discount;
+    private int testResult;
+    private boolean approved;
+    private int licenseAge;
 
-    User(String type) {
+    public User(String type) {
         this.type = type;
+        this.discount = 0;
+        this.approved = false;
     }
 
 

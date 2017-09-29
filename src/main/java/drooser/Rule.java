@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class Rule {
 
-    Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(Rule.class);
 
     public static void executeRule(User user) {
 

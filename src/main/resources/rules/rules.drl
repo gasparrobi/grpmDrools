@@ -1,24 +1,46 @@
-import drooser.User
+import drooser.User;
+import droooser.RearestComparator;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+declare Node
+    value : Integer @key
+    count : Integer @key
+end
+
+function int compareTo() {
+    return 1234;
+}
 
 rule "Set Discount for employees"
     lock-on-active true
     salience 1
     when
-        user : User(type == "groupama")
+        $user : User(type == "groupama")
     then
+
+        Node n1 = new Node(1,12);
+        Node n2 = new Node(2,10);
+        List<Node> nodeList = new ArrayList(Arrays.asList(n1,n2));
+        System.out.println(nodeList);
+        Collections.sort(nodeList);
+        System.out.println(nodeList);
+
+
         System.out.println("user got 10% groupama discount");
-        user.setDiscount(10);
+        $user.setDiscount(10);
      end
 
 rule "Set Discount for non-employees"
     lock-on-active true
     salience 2
     when
-        user : User(type != "groupama")
+        $user : User(type != "groupama")
     then
         System.out.println("user got 5% discount");
-        user.setDiscount(5);
+        $user.setDiscount(5);
      end
 
 rule "Approve user"
@@ -26,7 +48,7 @@ rule "Approve user"
     salience 3
     when
         // same as:
-        // user : User(testResult > 80 && approved == false && licenseAge > 3)
+        // $user : User(testResult > 80 && approved == false && licenseAge > 3)
         $user : User(getTestResult() > 80 && getApproved() == false && getLicenseAge() > 3)
     then
         System.out.println("user is approved");
@@ -40,10 +62,10 @@ rule "Decline user"
     salience 4
     lock-on-active true
     when
-        user : User(getTestResult() < 80 || getLicenseAge() <= 3)
+        $user : User(getTestResult() < 80 || getLicenseAge() <= 3)
     then
         System.out.println("user is declined");
-        user.setApproved(false);
+        $user.setApproved(false);
      end
 
 // When modify is used Drools re-evaluate and re-activate the rules
@@ -54,10 +76,10 @@ rule "Set test result for approval"
     // comment out to cause infinite loop
     lock-on-active true
     when
-        user : User(testResult < 80)
+        $user : User(testResult < 80)
     then
         System.out.println("test result set for 90");
-        modify(user){
+        modify($user){
             setTestResult(90)
         };
      end
@@ -66,19 +88,15 @@ rule "Set test result for rejection"
     // comment out to cause infinite loop
     lock-on-active true
     when
-        user : User(testResult > 80)
+        $user : User(testResult > 80)
     then
         System.out.println("test result set for 70");
-        modify(user){
+        modify($user){
             setTestResult(70)
         }
 
      end
 
-//
-//declare Person
-//    type : String @key
-//    discount : Integer @key
-//    testResult : Integer
-//    approved : Boolean
-//end
+
+
+
